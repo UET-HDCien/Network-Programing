@@ -10,34 +10,43 @@ public class Client {
 		int num;
 		int remaining;
 		Scanner in=new Scanner(System.in);
-		System.out.println("Enter server IP, default port=1508: ");
+		System.out.print("Enter server IP, default port=1508: ");
 		String IP=in.nextLine();
 		try {
 			sockfd=new Socket(IP,1508);
-			System.out.println("Enter file name: ");
-			String fileName=in.nextLine();
-			//sendFile(fileName);
-			DataInputStream dis = new DataInputStream(sockfd.getInputStream());
-			DataOutputStream dos = new DataOutputStream(sockfd.getOutputStream());	
-			dos.write(fileName.getBytes());
-			int size;
-			byte[] s=new byte[4];
-			dis.read(s);
-			size=(int)s[0]*256*256*256+(int)s[1]*256*256+(int)s[2]*256+(int)s[3];
-			System.out.println(size);
-			FileOutputStream fos = new FileOutputStream(fileName.trim());
-			byte[] buffer = new byte[1024];
-			while (size>0) {
-				num=dis.read(buffer);
-				size-=num;
-				fos.write(buffer, 0, num);
+			System.out.println("Connected, press \"QUIT\" to close connection!");
+				
+			while(1==1) {
+				DataInputStream dis = new DataInputStream(sockfd.getInputStream());
+				DataOutputStream dos = new DataOutputStream(sockfd.getOutputStream());
+				System.out.println("Enter file name: ");
+				String fileName=in.nextLine();
+				if (fileName.equals("QUIT")) break; 
+				//sendFile(fileName);
+				dos.write(fileName.getBytes());
+				int size;
+				//byte[] s=new byte[4];
+				//dis.read(s);
+				size=dis.readInt();
+				System.out.println(size);
+				if(size==0) {
+					System.out.println("File not found!");
+					continue;
+				}
+				FileOutputStream fos = new FileOutputStream(fileName.trim());
+				byte[] buffer = new byte[1024];
+				while (size>0) {
+					num=dis.read(buffer);
+					size-=num;
+					fos.write(buffer, 0, num);
+				}
+				fos.close();
 			}
-			fos.close();
-			dis.close();
-			dos.close();
+			sockfd.close();
 		}
 		catch (Exception e) {
 			System.out.println(e);
 		}
+
 	}
 }
