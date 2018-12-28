@@ -84,7 +84,7 @@ int downloadfile(char *IP, int port, char *filename, uint64_t start, uint64_t fi
 	char buffer[1024];
 	int r;
 	int w;
-	size_t l;
+	int l;
 	sockfd=socket(AF_INET,SOCK_STREAM,0);
 	if (sockfd<0) {
 		perror("Error:");
@@ -99,11 +99,6 @@ int downloadfile(char *IP, int port, char *filename, uint64_t start, uint64_t fi
 		return 1;
 	}
 	l=strlen(filename);
-	char type=3;
-	w=write(sockfd,&type,sizeof(char));
-	if (w<0) {
-		printf("%s\n","Write socket Error!" );
-	}
 	w=write(sockfd,&l,sizeof(int));
 	if (w<0) {
 		printf("%s\n","Write socket Error!" );
@@ -123,6 +118,7 @@ int downloadfile(char *IP, int port, char *filename, uint64_t start, uint64_t fi
 	size_t fileSize=finish-start+1;
 	FILE *fp;
 	fp=fopen(tmpfile,"a");
+	fseek (fp , start , SEEK_SET);
 	while (fileSize>0) {
 		r=read(sockfd,buffer,1024);
 		fileSize-=r;
@@ -135,10 +131,17 @@ int downloadfile(char *IP, int port, char *filename, uint64_t start, uint64_t fi
 }
 
 int main(int argc, char *argv[]) {
-	char IP[15]="127.0.0.1";
-	int port=8080;
+	char IP[15];
+	strcpy(IP,"127.0.0.1");
+	char filename[20];
+	strcpy(filename,"lab2");
+	char tmpfile[20];
+	strcpy(tmpfile,"sample1.txt");
+	int port=1508;
 	uint64_t start=0;
-	uint64_t finish=176;
-
-	
+	uint64_t finish1=90;
+	uint64_t finish=175;
+	downloadfile(IP,port,filename,start,finish1,tmpfile);
+	downloadfile(IP,port,filename,finish1+1,finish,tmpfile);
+	return 0;
 }
